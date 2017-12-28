@@ -155,7 +155,7 @@ parsedRepos.each {
 			}
 			git {
 				pushOnlyIfSuccess()
-				tag('origin', "dev/\${PIPELINE_VERSION}") {
+				tag('origin', "dev/${gitRepoName}/\${PIPELINE_VERSION}") {
 					create()
 					update()
 				}
@@ -185,7 +185,7 @@ parsedRepos.each {
 			}
 			jdk(jdkVersion)
 			scm {
-				configureScm(delegate as ScmContext, fullGitRepo, 'dev/${PIPELINE_VERSION}')
+				configureScm(delegate as ScmContext, fullGitRepo, "dev/${gitRepoName}/\${PIPELINE_VERSION}")
 			}
 			steps {
 				shell("""#!/bin/bash
@@ -238,7 +238,7 @@ parsedRepos.each {
 			}
 		}
 		scm {
-			configureScm(delegate as ScmContext, fullGitRepo, 'dev/${PIPELINE_VERSION}')
+			configureScm(delegate as ScmContext, fullGitRepo, "dev/${gitRepoName}/\${PIPELINE_VERSION}")
 		}
 		steps {
 			shell("""#!/bin/bash
@@ -292,7 +292,7 @@ parsedRepos.each {
 			}
 		}
 		scm {
-			configureScm(delegate as ScmContext, fullGitRepo, 'dev/${PIPELINE_VERSION}')
+			configureScm(delegate as ScmContext, fullGitRepo, "dev/${gitRepoName}/\${PIPELINE_VERSION}")
 		}
 		steps {
 			shell("""#!/bin/bash
@@ -350,7 +350,7 @@ parsedRepos.each {
 				}
 			}
 			scm {
-				configureScm(delegate as ScmContext, fullGitRepo, 'dev/${PIPELINE_VERSION}')
+				configureScm(delegate as ScmContext, fullGitRepo, "dev/${gitRepoName}/\${PIPELINE_VERSION}")
 			}
 			steps {
 				shell("""#!/bin/bash
@@ -406,7 +406,7 @@ parsedRepos.each {
 				}
 			}
 			scm {
-				configureScm(delegate as ScmContext, fullGitRepo, 'dev/${PIPELINE_VERSION}')
+				configureScm(delegate as ScmContext, fullGitRepo, "dev/${gitRepoName}/\${PIPELINE_VERSION}")
 			}
 			steps {
 				shell("""#!/bin/bash
@@ -488,7 +488,7 @@ parsedRepos.each {
 				}
 			}
 			scm {
-				configureScm(delegate as ScmContext, fullGitRepo, 'dev/${PIPELINE_VERSION}')
+				configureScm(delegate as ScmContext, fullGitRepo, "dev/${gitRepoName}/\${PIPELINE_VERSION}")
 			}
 			steps {
 				shell("""#!/bin/bash
@@ -552,7 +552,7 @@ parsedRepos.each {
 				}
 			}
 			scm {
-				configureScm(delegate as ScmContext, fullGitRepo, 'dev/${PIPELINE_VERSION}')
+				configureScm(delegate as ScmContext, fullGitRepo, "dev/${gitRepoName}/\${PIPELINE_VERSION}")
 			}
 			steps {
 				shell("""#!/bin/bash
@@ -608,7 +608,7 @@ parsedRepos.each {
 			}
 		}
 		scm {
-			configureScm(delegate as ScmContext, fullGitRepo, 'dev/${PIPELINE_VERSION}')
+			configureScm(delegate as ScmContext, fullGitRepo, "dev/${gitRepoName}/\${PIPELINE_VERSION}")
 		}
 		configure { def project ->
 			// Adding user email and name here instead of global settings
@@ -643,7 +643,7 @@ parsedRepos.each {
 			git {
 				forcePush(true)
 				pushOnlyIfSuccess()
-				tag('origin', "prod/\${PIPELINE_VERSION}") {
+				tag('origin', "prod/${gitRepoName}/\${PIPELINE_VERSION}") {
 					create()
 					update()
 				}
@@ -675,7 +675,7 @@ parsedRepos.each {
 			}
 		}
 		scm {
-			configureScm(delegate as ScmContext, fullGitRepo, 'dev/${PIPELINE_VERSION}')
+			configureScm(delegate as ScmContext, fullGitRepo, "dev/${gitRepoName}/\${PIPELINE_VERSION}")
 		}
 		steps {
 			shell("""#!/bin/bash
@@ -711,7 +711,7 @@ parsedRepos.each {
 			}
 		}
 		scm {
-			configureScm(delegate as ScmContext, fullGitRepo, 'dev/${PIPELINE_VERSION}')
+			configureScm(delegate as ScmContext, fullGitRepo, "dev/${gitRepoName}/\${PIPELINE_VERSION}")
 		}
 		steps {
 			shell("""#!/bin/bash
