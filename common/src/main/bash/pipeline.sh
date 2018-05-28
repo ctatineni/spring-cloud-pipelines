@@ -238,7 +238,7 @@ echo "Path to custom script is [${CUSTOM_SCRIPT_DIR}/${CUSTOM_SCRIPT_NAME}]"
 [[ -f "${CUSTOM_SCRIPT_DIR}/${CUSTOM_SCRIPT_NAME}" ]] && source "${CUSTOM_SCRIPT_DIR}/${CUSTOM_SCRIPT_NAME}" ||  \
  echo "No ${CUSTOM_SCRIPT_DIR}/${CUSTOM_SCRIPT_NAME} found"
 
-export ROOT_PROJECT_DIR
+export ROOT_PROJECT_DIR="${ROOT_PROJECT_DIR}"
 export PROJECT_SETUP
 export PROJECT_NAME
 # if pipeline descriptor is in the provided folder that means that
@@ -254,7 +254,7 @@ if [[ "${PIPELINE_DESCRIPTOR_PRESENT}" == "true" ]]; then
 	fi
 else
 	# if pipeline descriptor is missing but the provided root project dir exists
-	# that means that it's a multi-project and we need to
+	# that means that it's a multi-project and we need to cd to that folder
 	if [[ -f "${ROOT_PROJECT_DIR}" ]]; then
 		cd "${ROOT_PROJECT_DIR}"
 		buildCoordinates="$( getBuildCoordinates )"

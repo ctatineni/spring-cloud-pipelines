@@ -109,7 +109,8 @@ teardown() {
 
 @test "should run the check when prod tag exists for apiCompatibilityCheck for Concourse [Gradle]" {
 	export CI="CONCOURSE"
-	export LATEST_PROD_TAG="prod/100.0.0"
+	export PROJECT_NAME="build_project"
+	export LATEST_PROD_TAG="prod/${PROJECT_NAME}/100.0.0"
 	cd "${TEMP_DIR}/gradle/build_project"
 	source "${SOURCE_DIR}/projectType/pipeline-gradle.sh"
 
@@ -123,7 +124,8 @@ teardown() {
 
 @test "should run the check when prod tag exists for apiCompatibilityCheck for Jenkins [Gradle]" {
 	export CI="JENKINS"
-	export LATEST_PROD_TAG="prod/100.0.0"
+	export PROJECT_NAME="build_project"
+	export LATEST_PROD_TAG="prod/${PROJECT_NAME}/100.0.0"
 	cd "${TEMP_DIR}/gradle/build_project"
 	source "${SOURCE_DIR}/projectType/pipeline-gradle.sh"
 

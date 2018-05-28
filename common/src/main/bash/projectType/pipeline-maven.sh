@@ -36,6 +36,7 @@ function apiCompatibilityCheck() {
 	if [[ -z "${prodTag}" ]]; then
 		echo "No prod release took place - skipping this step"
 	else
+		PROJECT_NAME=${PROJECT_NAME?PROJECT_NAME must be set!}
 		# Putting env vars to output properties file for parameter passing
 		export PASSED_LATEST_PROD_TAG="${prodTag}"
 		local fileLocation="${OUTPUT_FOLDER}/test.properties"
