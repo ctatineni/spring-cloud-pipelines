@@ -74,21 +74,43 @@ function extractMavenProperty() {
 	fi
 }
 
+# TODO: Group id taken from build coordinates
 function retrieveGroupId() {
+	local coordinates
+	coordinates="${1:-.}"
+	local replacement
+	replacement="/"
+	local projectFolders
+	# foo:bar:baz -> foo/bar/baz
+	# shellcheck disable=SC2116
+	projectFolders="$( echo "${coordinates/:/$replacement}" )"
+	# nothing -> .
+	projectFolders="${projectFolders:-.}"
 	{
 		ruby -r rexml/document  \
- -e 'puts REXML::Document.new(File.new(ARGV.shift)).elements["/project/groupId"].text' pom.xml  \
+ -e 'puts REXML::Document.new(File.new(ARGV.shift)).elements["/project/groupId"].text' "${projectFolders}"/pom.xml  \
  || "${MAVENW_BIN}" org.apache.maven.plugins:maven-help-plugin:2.2:evaluate  \
- -Dexpression=project.groupId | grep -Ev '(^\[|Download\w+:)'
+ -Dexpression=project.groupId -pl "${coordinates}" | grep -Ev '(^\[|Download\w+:)'
 	} | tail -1
 }
 
+# TODO: App name taken from build coordinates
 function retrieveAppName() {
+	local coordinates
+	coordinates="${1:-.}"
+	local replacement
+	replacement="/"
+	local projectFolders
+	# foo:bar:baz -> foo/bar/baz
+	# shellcheck disable=SC2116
+	projectFolders="$( echo "${coordinates/:/$replacement}" )"
+	# nothing -> .
+	projectFolders="${projectFolders:-.}"
 	{
 		ruby -r rexml/document  \
- -e 'puts REXML::Document.new(File.new(ARGV.shift)).elements["/project/artifactId"].text' pom.xml  \
+ -e 'puts REXML::Document.new(File.new(ARGV.shift)).elements["/project/artifactId"].text' "${projectFolders}"/pom.xml  \
  || "${MAVENW_BIN}" org.apache.maven.plugins:maven-help-plugin:2.2:evaluate  \
- -Dexpression=project.artifactId | grep -Ev '(^\[|Download\w+:)'
+ -Dexpression=project.artifactId -pl "${coordinates}"  | grep -Ev '(^\[|Download\w+:)'
 	} | tail -1
 }
 
