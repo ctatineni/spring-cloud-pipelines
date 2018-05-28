@@ -705,7 +705,6 @@ export -f fakeRetrieveStubRunnerIds
 	# logged in
 	assert_output --partial "cf api --skip-ssl-validation ${env}-api"
 	assert_output --partial "cf login -u ${env}-username -p ${env}-password -o ${env}-org -s ${env}-space"
-	refute_output --partial "No pipeline descriptor found - will not deploy any services"
 	refute_output --partial "cf delete -f my-project"
 	assert_output --partial "cf push my-project -f manifest.yml -p target/my-project-.jar -n my-project -i 2 --no-start"
 	assert_output --partial "cf set-env my-project SPRING_PROFILES_ACTIVE cloud,prod"
@@ -729,7 +728,6 @@ export -f fakeRetrieveStubRunnerIds
 	# logged in
 	assert_output --partial "cf api --skip-ssl-validation ${env}-api"
 	assert_output --partial "cf login -u ${env}-username -p ${env}-password -o ${env}-org -s ${env}-space"
-	refute_output --partial "No pipeline descriptor found - will not deploy any services"
 	refute_output --partial "cf delete -f my-project"
 	assert_output --partial "cf push ${projectName} -f manifest.yml -p build/libs/${projectNameUppercase}-.jar -n ${projectName} -i 2 --no-start"
 	assert_output --partial "cf set-env ${projectName} SPRING_PROFILES_ACTIVE cloud,prod"

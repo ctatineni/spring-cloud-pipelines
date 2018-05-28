@@ -172,15 +172,16 @@ function deployServices() {
 	fi
 
 	while read -r serviceName serviceType useExisting; do
-	    serviceType=$(toLowerCase "${serviceType}")
+		local parsedServiceType
+		parsedServiceType=$(toLowerCase "${serviceType}")
 		if [[ "${ENVIRONMENT}" == "TEST" && "${useExisting}" != "true" ]]; then
-			deleteService "${serviceName}" "${serviceType}"
-			deployService "${serviceName}" "${serviceType}"
+			deleteService "${serviceName}" "${parsedServiceType}"
+			deployService "${serviceName}" "${parsedServiceType}"
 		else
 			if [[ "$(serviceExists "${serviceName}")" == "true" ]]; then
 				echo "Skipping deployment since service is already deployed"
 			else
-				deployService "${serviceName}" "${serviceType}"
+				deployService "${serviceName}" "${parsedServiceType}"
 			fi
 		fi
 	# retrieve the space separated name and type
@@ -238,36 +239,47 @@ echo "Path to custom script is [${CUSTOM_SCRIPT_DIR}/${CUSTOM_SCRIPT_NAME}]"
 [[ -f "${CUSTOM_SCRIPT_DIR}/${CUSTOM_SCRIPT_NAME}" ]] && source "${CUSTOM_SCRIPT_DIR}/${CUSTOM_SCRIPT_NAME}" ||  \
  echo "No ${CUSTOM_SCRIPT_DIR}/${CUSTOM_SCRIPT_NAME} found"
 
-export ROOT_PROJECT_DIR="${ROOT_PROJECT_DIR}"
+export ROOT_PROJECT_DIR
 export PROJECT_SETUP
 export PROJECT_NAME
+parsePipelineDescriptor
+echo "Root project directory [${ROOT_PROJECT_DIR}]"
 # if pipeline descriptor is in the provided folder that means that
 # we don't have a descriptor per application
 if [[ "${PIPELINE_DESCRIPTOR_PRESENT}" == "true" ]]; then
+	echo "Pipeline descriptor found"
 	buildCoordinates="$( getBuildCoordinates )"
 	if [[ "${buildCoordinates}" != "" && "${buildCoordinates}" != "null" ]]; then
 		# multi module - has a coordinates section in the descriptor
 		PROJECT_SETUP="MULTI_MODULE"
+		echo "Build coordinates section found, project setup [${PROJECT_SETUP}]"
 	else
 		# single repo - no coordinates
 		PROJECT_SETUP="SINGLE_REPO"
+		echo "No build coordinates section found, project setup [${PROJECT_SETUP}]"
 	fi
 else
+	echo "Pipeline descriptor missing"
 	# if pipeline descriptor is missing but the provided root project dir exists
 	# that means that it's a multi-project and we need to cd to that folder
-	if [[ -f "${ROOT_PROJECT_DIR}" ]]; then
+	if [[ -d "${ROOT_PROJECT_DIR}" ]]; then
+		echo "Root project dir found [${ROOT_PROJECT_DIR}]"
 		cd "${ROOT_PROJECT_DIR}"
+		parsePipelineDescriptor
 		buildCoordinates="$( getBuildCoordinates )"
 		if [[ "${buildCoordinates}" != "" && "${buildCoordinates}" != "null" ]]; then
 			# multi project with module - has a coordinates section in the descriptor
 			PROJECT_SETUP="MULTI_PROJECT_WITH_MODULES"
+			echo "Build coordinates section found, project setup [${PROJECT_SETUP}]"
 		else
 			# multi project without modules
 			PROJECT_SETUP="MULTI_PROJECT"
+			echo "No build coordinates section found, project setup [${PROJECT_SETUP}]"
 		fi
 	else
 		# No descriptor and no module is present - will treat it as a single repo with no descriptor
 		PROJECT_SETUP="SINGLE_REPO"
+		echo "No descriptor or module found, project setup [${PROJECT_SETUP}]"
 	fi
 fi
 # Regardless of the project setup, if the root project dir doesn't exist, we should point
