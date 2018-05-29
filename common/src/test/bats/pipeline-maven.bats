@@ -179,6 +179,16 @@ teardown() {
 	assert_success
 }
 
+@test "should print group id for multi module [Maven]" {
+	cd "${TEMP_DIR}/maven/multi_module"
+	source "${SOURCE_DIR}/projectType/pipeline-maven.sh"
+
+	run retrieveGroupId "foo/bar"
+
+	assert_output "com.example"
+	assert_success
+}
+
 @test "should print artifact id [Maven]" {
 	cd "${TEMP_DIR}/maven/build_project"
 	source "${SOURCE_DIR}/projectType/pipeline-maven.sh"
@@ -186,6 +196,16 @@ teardown() {
 	run retrieveAppName
 
 	assert_output "my-project"
+	assert_success
+}
+
+@test "should print artifact id for multi module [Maven]" {
+	cd "${TEMP_DIR}/maven/multi_module"
+	source "${SOURCE_DIR}/projectType/pipeline-maven.sh"
+
+	run retrieveAppName "foo/bar"
+
+	assert_output "my-project-bar"
 	assert_success
 }
 

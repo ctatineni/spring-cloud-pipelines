@@ -76,28 +76,8 @@ function extractMavenProperty() {
 
 # TODO: Group id taken from build coordinates
 function retrieveGroupId() {
-	local coordinates
-	coordinates="${1:-.}"
-	local replacement
-	replacement="/"
-	local projectFolders
-	# foo:bar:baz -> foo/bar/baz
-	# shellcheck disable=SC2116
-	projectFolders="$( echo "${coordinates/:/$replacement}" )"
-	# nothing -> .
-	projectFolders="${projectFolders:-.}"
-	{
-		ruby -r rexml/document  \
- -e 'puts REXML::Document.new(File.new(ARGV.shift)).elements["/project/groupId"].text' "${projectFolders}"/pom.xml  \
- || "${MAVENW_BIN}" org.apache.maven.plugins:maven-help-plugin:2.2:evaluate  \
- -Dexpression=project.groupId -pl "${coordinates}" | grep -Ev '(^\[|Download\w+:)'
-	} | tail -1
-}
-
-# TODO: App name taken from build coordinates
-function retrieveAppName() {
-	local coordinates
-	coordinates="${1:-.}"
+	local path
+	path="${1:-.}"
 #	local replacement
 #	replacement="/"
 	local projectFolders
@@ -105,13 +85,25 @@ function retrieveAppName() {
 	# shellcheck disable=SC2116
 #	projectFolders="$( echo "${coordinates/:/$replacement}" )"
 	# nothing -> .
-	projectFolders="${projectFolders:-.}"
+#	projectFolders="${projectFolders:-.}"
 	{
 		ruby -r rexml/document  \
- -e 'puts REXML::Document.new(File.new(ARGV.shift)).elements["/project/artifactId"].text' "${projectFolders}"/pom.xml  \
+ -e 'parsed = REXML::Document.new(File.new(ARGV.shift)); puts (parsed.elements["/project/groupId"].nil? ? parsed.elements["/project/parent/groupId"].text : parsed.elements["/project/groupId"].text)' "${path}"/pom.xml | tail -1  \
  || "${MAVENW_BIN}" org.apache.maven.plugins:maven-help-plugin:2.2:evaluate  \
- -Dexpression=project.artifactId -pl "${coordinates}"  | grep -Ev '(^\[|Download\w+:)'
+ -Dexpression=project.groupId -f "${path}"/pom.xml  | grep -Ev '(^\[|Download\w+:)'
 	} | tail -1
+}
+
+# TODO: App name taken from build coordinates
+function retrieveAppName() {
+	local path
+	path="${1:-.}"
+	{
+		ruby -r rexml/document  \
+ -e 'puts REXML::Document.new(File.new(ARGV.shift)).elements["/project/artifactId"].text' "${path}"/pom.xml | tail -1 \
+ || "${MAVENW_BIN}" org.apache.maven.plugins:maven-help-plugin:2.2:evaluate  \
+ -Dexpression=project.artifactId -f "${path}"/pom.xml  | grep -Ev '(^\[|Download\w+:)'
+	} | grep -Ev '(^\[|Error\w+:)' | tail -1
 }
 
 function printTestResults() {
