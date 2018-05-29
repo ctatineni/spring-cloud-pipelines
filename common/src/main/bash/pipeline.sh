@@ -200,8 +200,8 @@ function toLowerCase() {
 }
 
 # Gets the build coordinates from descriptor
-function getBuildCoordinates() {
-	echo "${PARSED_YAML}" | jq -r '.build.coordinates'
+function getMainModulePath() {
+	echo "${PARSED_YAML}" | jq -r '.build."main-module"'
 }
 
 PAAS_TYPE="$( toLowerCase "${PAAS_TYPE:-cf}" )"
@@ -248,8 +248,8 @@ echo "Root project directory [${ROOT_PROJECT_DIR}]"
 # we don't have a descriptor per application
 if [[ "${PIPELINE_DESCRIPTOR_PRESENT}" == "true" ]]; then
 	echo "Pipeline descriptor found"
-	buildCoordinates="$( getBuildCoordinates )"
-	if [[ "${buildCoordinates}" != "" && "${buildCoordinates}" != "null" ]]; then
+	mainModulePath="$( getMainModulePath )"
+	if [[ "${mainModulePath}" != "" && "${mainModulePath}" != "null" ]]; then
 		# multi module - has a coordinates section in the descriptor
 		PROJECT_SETUP="MULTI_MODULE"
 		echo "Build coordinates section found, project setup [${PROJECT_SETUP}]"
@@ -266,8 +266,8 @@ else
 		echo "Root project dir found [${ROOT_PROJECT_DIR}]"
 		cd "${ROOT_PROJECT_DIR}"
 		parsePipelineDescriptor
-		buildCoordinates="$( getBuildCoordinates )"
-		if [[ "${buildCoordinates}" != "" && "${buildCoordinates}" != "null" ]]; then
+		mainModulePath="$( getMainModulePath )"
+		if [[ "${mainModulePath}" != "" && "${mainModulePath}" != "null" ]]; then
 			# multi project with module - has a coordinates section in the descriptor
 			PROJECT_SETUP="MULTI_PROJECT_WITH_MODULES"
 			echo "Build coordinates section found, project setup [${PROJECT_SETUP}]"

@@ -1,2 +1,2 @@
 build:
-  coordinates: foo:bar
+  main-module: foo/bar

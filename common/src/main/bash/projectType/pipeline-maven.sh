@@ -98,12 +98,12 @@ function retrieveGroupId() {
 function retrieveAppName() {
 	local coordinates
 	coordinates="${1:-.}"
-	local replacement
-	replacement="/"
+#	local replacement
+#	replacement="/"
 	local projectFolders
 	# foo:bar:baz -> foo/bar/baz
 	# shellcheck disable=SC2116
-	projectFolders="$( echo "${coordinates/:/$replacement}" )"
+#	projectFolders="$( echo "${coordinates/:/$replacement}" )"
 	# nothing -> .
 	projectFolders="${projectFolders:-.}"
 	{
