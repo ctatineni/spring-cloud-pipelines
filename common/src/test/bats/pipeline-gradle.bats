@@ -155,6 +155,19 @@ teardown() {
 	assert_equal "${result}" "my-project"
 }
 
+# with Gradle we get the artifact id via property so we can ignore
+# whether there is an entry in sc-pipelines for build.main-module
+# we still will suggest to set it cause it can be valuable to know
+# which module produces the fat jar
+@test "should print artifact id in multi-module [Gradle]" {
+	cd "${TEMP_DIR}/gradle/multi_module"
+	source "${SOURCE_DIR}/projectType/pipeline-gradle.sh"
+
+	result="$( retrieveAppName )"
+
+	assert_equal "${result}" "bar"
+}
+
 @test "should print that build has failed [Gradle]" {
 	source "${SOURCE_DIR}/projectType/pipeline-gradle.sh"
 
@@ -228,7 +241,7 @@ teardown() {
 	assert_success
 }
 
-@test "should return 'target' for outputFolder [Gradle]" {
+@test "should return 'build/libs' for outputFolder [Gradle]" {
 	source "${SOURCE_DIR}/projectType/pipeline-gradle.sh"
 
 	run outputFolder

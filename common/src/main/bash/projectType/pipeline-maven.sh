@@ -80,7 +80,7 @@ function retrieveGroupId() {
 	path="${1:-.}"
 #	local replacement
 #	replacement="/"
-	local projectFolders
+#	local projectFolders
 	# foo:bar:baz -> foo/bar/baz
 	# shellcheck disable=SC2116
 #	projectFolders="$( echo "${coordinates/:/$replacement}" )"
