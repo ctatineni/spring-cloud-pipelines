@@ -97,7 +97,14 @@ function retrieveGroupId() {
 # TODO: App name taken from build coordinates
 function retrieveAppName() {
 	local path
-	path="${1:-.}"
+	local mainModule
+	# checks if the getMainModulePath function is defined. If not will just pick the current folder as main module
+	if [ -n "$(type -t getMainModulePath)" ] && [ "$(type -t getMainModulePath)" = function ]; then
+		mainModule="$( getMainModulePath )"
+	else
+		mainModule="."
+	fi
+	path="${1:-${mainModule:-.}}"
 	{
 		ruby -r rexml/document  \
  -e 'puts REXML::Document.new(File.new(ARGV.shift)).elements["/project/artifactId"].text' "${path}"/pom.xml | tail -1 \

@@ -201,7 +201,16 @@ function toLowerCase() {
 
 # Gets the build coordinates from descriptor
 function getMainModulePath() {
-	echo "${PARSED_YAML}" | jq -r '.build.main_module'
+	if [[ ! -z "${PARSED_YAML}" ]]; then
+		local mainModule
+		mainModule="$( echo "${PARSED_YAML}" | jq -r '.build.main_module' )"
+		if [[ "${mainModule}" == "null" ]]; then
+			mainModule=""
+		fi
+		echo "${mainModule}"
+	else
+		echo ""
+	fi
 }
 
 PAAS_TYPE="$( toLowerCase "${PAAS_TYPE:-cf}" )"
@@ -252,11 +261,11 @@ if [[ "${PIPELINE_DESCRIPTOR_PRESENT}" == "true" ]]; then
 	if [[ "${mainModulePath}" != "" && "${mainModulePath}" != "null" ]]; then
 		# multi module - has a coordinates section in the descriptor
 		PROJECT_SETUP="MULTI_MODULE"
-		echo "Build coordinates section found, project setup [${PROJECT_SETUP}]"
+		echo "Build coordinates section found, project setup [${PROJECT_SETUP}], main module path [${mainModulePath}]"
 	else
 		# single repo - no coordinates
 		PROJECT_SETUP="SINGLE_REPO"
-		echo "No build coordinates section found, project setup [${PROJECT_SETUP}]"
+		echo "No build coordinates section found, project setup [${PROJECT_SETUP}], main module path [${mainModulePath}]"
 	fi
 else
 	echo "Pipeline descriptor missing"
@@ -270,11 +279,11 @@ else
 		if [[ "${mainModulePath}" != "" && "${mainModulePath}" != "null" ]]; then
 			# multi project with module - has a coordinates section in the descriptor
 			PROJECT_SETUP="MULTI_PROJECT_WITH_MODULES"
-			echo "Build coordinates section found, project setup [${PROJECT_SETUP}]"
+			echo "Build coordinates section found, project setup [${PROJECT_SETUP}], main module path [${mainModulePath}]"
 		else
 			# multi project without modules
 			PROJECT_SETUP="MULTI_PROJECT"
-			echo "No build coordinates section found, project setup [${PROJECT_SETUP}]"
+			echo "No build coordinates section found, project setup [${PROJECT_SETUP}], main module path [${mainModulePath}]"
 		fi
 	else
 		# No descriptor and no module is present - will treat it as a single repo with no descriptor
