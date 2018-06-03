@@ -156,7 +156,7 @@ teardown() {
 }
 
 # with Gradle we get the artifact id via property so we can ignore
-# whether there is an entry in sc-pipelines for build.main-module
+# whether there is an entry in sc-pipelines for build.main_module
 # we still will suggest to set it cause it can be valuable to know
 # which module produces the fat jar
 @test "should print artifact id in multi-module [Gradle]" {

@@ -1,2 +1,2 @@
 build:
-  main-module: foo/bar
+  main_module: foo/bar

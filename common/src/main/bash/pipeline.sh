@@ -201,7 +201,7 @@ function toLowerCase() {
 
 # Gets the build coordinates from descriptor
 function getMainModulePath() {
-	echo "${PARSED_YAML}" | jq -r '.build."main-module"'
+	echo "${PARSED_YAML}" | jq -r '.build.main_module'
 }
 
 PAAS_TYPE="$( toLowerCase "${PAAS_TYPE:-cf}" )"
