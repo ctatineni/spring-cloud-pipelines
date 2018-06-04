@@ -367,7 +367,7 @@ export -f fakeRetrieveStubRunnerIds
 	# logged in
 	assert_output --partial "cf api --skip-ssl-validation ${env}-api"
 	assert_output --partial "cf login -u ${env}-username -p ${env}-password -o ${env}-org -s ${env}-space-my-project"
-	assert_output --partial "mvnw clean install -Psmoke -Dapplication.url=my-project-sc-pipelines.demo.io -Dstubrunner.url= -Djava.security.egd=file:///dev/urandom"
+	assert_output --partial "mvnw clean test -Psmoke -Dapplication.url=my-project-sc-pipelines.demo.io -Dstubrunner.url= -Djava.security.egd=file:///dev/urandom"
 	assert_success
 }
 
@@ -509,7 +509,7 @@ export -f fakeRetrieveStubRunnerIds
 	assert_output --partial "git checkout prod/build_project/1.0.0.FOO"
 	assert_output --partial "cf api --skip-ssl-validation ${env}-api"
 	assert_output --partial "cf login -u ${env}-username -p ${env}-password -o ${env}-org -s ${env}-space-my-project"
-	assert_output --partial "mvnw clean install -Psmoke -Dapplication.url=my-project-sc-pipelines.demo.io -Dstubrunner.url= -Djava.security.egd=file:///dev/urandom"
+	assert_output --partial "mvnw clean test -Psmoke -Dapplication.url=my-project-sc-pipelines.demo.io -Dstubrunner.url= -Djava.security.egd=file:///dev/urandom"
 	assert_success
 }
 
@@ -672,7 +672,7 @@ export -f fakeRetrieveStubRunnerIds
 	# logged in
 	assert_output --partial "cf api --skip-ssl-validation ${env}-api"
 	assert_output --partial "cf login -u ${env}-username -p ${env}-password -o ${env}-org -s ${env}-space"
-	assert_output --partial "mvnw clean install -Pe2e -Dapplication.url=my-project-sc-pipelines.demo.io -Djava.security.egd=file:///dev/urandom"
+	assert_output --partial "mvnw clean test -Pe2e -Dapplication.url=my-project-sc-pipelines.demo.io -Djava.security.egd=file:///dev/urandom"
 	assert_success
 }
 

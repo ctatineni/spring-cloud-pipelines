@@ -129,10 +129,10 @@ function runSmokeTests() {
 
 	if [[ "${CI}" == "CONCOURSE" ]]; then
 		# shellcheck disable=SC2086
-		"${MAVENW_BIN}" clean install -Psmoke -Dapplication.url="${applicationUrl}" -Dstubrunner.url="${stubrunnerUrl}" ${BUILD_OPTIONS} || (printTestResults && return 1)
+		"${MAVENW_BIN}" clean test -Psmoke -Dapplication.url="${applicationUrl}" -Dstubrunner.url="${stubrunnerUrl}" ${BUILD_OPTIONS} || (printTestResults && return 1)
 	else
 		# shellcheck disable=SC2086
-		"${MAVENW_BIN}" clean install -Psmoke -Dapplication.url="${applicationUrl}" -Dstubrunner.url="${stubrunnerUrl}" ${BUILD_OPTIONS}
+		"${MAVENW_BIN}" clean test -Psmoke -Dapplication.url="${applicationUrl}" -Dstubrunner.url="${stubrunnerUrl}" ${BUILD_OPTIONS}
 	fi
 }
 
@@ -142,10 +142,10 @@ function runE2eTests() {
 
 	if [[ "${CI}" == "CONCOURSE" ]]; then
 		# shellcheck disable=SC2086
-		"${MAVENW_BIN}" clean install -Pe2e -Dapplication.url="${applicationUrl}" ${BUILD_OPTIONS} || (printTestResults && return 1)
+		"${MAVENW_BIN}" clean test -Pe2e -Dapplication.url="${applicationUrl}" ${BUILD_OPTIONS} || (printTestResults && return 1)
 	else
 		# shellcheck disable=SC2086
-		"${MAVENW_BIN}" clean install -Pe2e -Dapplication.url="${applicationUrl}" ${BUILD_OPTIONS}
+		"${MAVENW_BIN}" clean test -Pe2e -Dapplication.url="${applicationUrl}" ${BUILD_OPTIONS}
 	fi
 }
 
