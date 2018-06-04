@@ -97,6 +97,7 @@ parsedRepos.each {
 	}
 
 	String projectName = "${gitRepoName}-pipeline"
+	defaults.addEnvVar("PROJECT_NAME", gitRepoName)
 
 	//  ======= JOBS =======
 	dsl.job("${projectName}-build") {
@@ -740,6 +741,7 @@ class PipelineDefaults {
 
 	private Map<String, String> defaultEnvVars(Map<String, String> variables) {
 		Map<String, String> envs = [:]
+		setIfPresent(envs, variables, "PROJECT_NAME")
 		setIfPresent(envs, variables, "PAAS_TYPE")
 		setIfPresent(envs, variables, "TOOLS_BRANCH")
 		setIfPresent(envs, variables, "M2_SETTINGS_REPO_ID")
@@ -804,5 +806,9 @@ class PipelineDefaults {
 		if (variables[prop]) {
 			envs[prop] = variables[prop]
 		}
+	}
+
+	void addEnvVar(String key, String value) {
+		this.defaultEnvVars.put(key, value)
 	}
 }
