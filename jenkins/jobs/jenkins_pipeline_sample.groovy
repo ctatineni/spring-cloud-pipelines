@@ -623,10 +623,9 @@ parsedRepos.each {
 		}
 		steps {
 			shell(downloadTools())
-			shell("""#!/bin/bash
-		${bashFunctions.setupGitCredentials(fullGitRepo)}
-		\${WORKSPACE}/.git/tools/common/src/main/bash/prod_deploy.sh
-		""")
+			shell('''#!/bin/bash
+		${WORKSPACE}/.git/tools/common/src/main/bash/prod_deploy.sh
+		''')
 		}
 		publishers {
 			// remove::start[K8S]
@@ -681,7 +680,7 @@ parsedRepos.each {
 		scm {
 			configureScm(delegate as ScmContext, fullGitRepo, "dev/${gitRepoName}/\${PIPELINE_VERSION}")
 		}
-		configure {
+		configure { project ->
 			if (gitUseSshKey) {
 				project / 'buildWrappers' / 'org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper' / 'bindings' << 'org.jenkinsci.plugins.credentialsbinding.impl.SSHUserPrivateKeyBinding' {
 					'credentialsId'(gitSshCredentials)
@@ -691,9 +690,10 @@ parsedRepos.each {
 		}
 		steps {
 			shell(downloadTools())
-			shell('''#!/bin/bash
-		${WORKSPACE}/.git/tools/common/src/main/bash/prod_rollback.sh
-		''')
+			shell("""#!/bin/bash
+		${bashFunctions.setupGitCredentials(fullGitRepo)}
+		\${WORKSPACE}/.git/tools/common/src/main/bash/prod_rollback.sh
+		""")
 		}
 	}
 
@@ -857,7 +857,8 @@ class BashFunctions {
 				ssh-add \$${PipelineDefaults.GIT_SSH_KEY_LOCATION_ENV_VAR} >/dev/null
 				"""
 		}
-		URI uri = URI.create(repoUrl)
+		String repoWithoutGit = repoUrl.startsWith("git@") ? repoUrl.substring("git@".length()) : repoUrl
+		URI uri = URI.create(repoWithoutGit)
 		String host = uri.getHost()
 		return """\
 					set +x
