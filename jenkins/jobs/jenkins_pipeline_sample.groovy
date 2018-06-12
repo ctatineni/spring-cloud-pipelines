@@ -1,3 +1,4 @@
+import groovy.transform.CompileStatic
 import javaposse.jobdsl.dsl.DslFactory
 import javaposse.jobdsl.dsl.helpers.ScmContext
 
@@ -29,6 +30,7 @@ String k8sProdTokenCredentialId = binding.variables["PAAS_PROD_CLIENT_TOKEN_ID"]
 // remove::end[K8S]
 String gitEmail = binding.variables["GIT_EMAIL"] ?: "pivo@tal.com"
 String gitName = binding.variables["GIT_NAME"] ?: "Pivo Tal"
+BashFunctions bashFunctions = new BashFunctions(gitName, gitEmail, gitUseSshKey)
 boolean autoStage = binding.variables["AUTO_DEPLOY_TO_STAGE"] == null ? false : Boolean.parseBoolean(binding.variables["AUTO_DEPLOY_TO_STAGE"])
 boolean autoProd = binding.variables["AUTO_DEPLOY_TO_PROD"] == null ? false : Boolean.parseBoolean(binding.variables["AUTO_DEPLOY_TO_PROD"])
 boolean apiCompatibilityStep = binding.variables["API_COMPATIBILITY_STEP_REQUIRED"] == null ? true : Boolean.parseBoolean(binding.variables["API_COMPATIBILITY_STEP_REQUIRED"])
@@ -129,6 +131,7 @@ parsedRepos.each {
 			credentialsBinding {
 				if (repoWithBinariesCredentials) usernamePassword('M2_SETTINGS_REPO_USERNAME', 'M2_SETTINGS_REPO_PASSWORD', repoWithBinariesCredentials)
 				if (dockerCredentials) usernamePassword('DOCKER_USERNAME', 'DOCKER_PASSWORD', dockerCredentials)
+				if (!gitUseSshKey) usernamePassword(PipelineDefaults.GIT_USER_ENV_VAR, PipelineDefaults.GIT_REPO_PASS_ENV_VAR, gitCredentials)
 			}
 		}
 		jdk(jdkVersion)
@@ -141,12 +144,19 @@ parsedRepos.each {
 				'email'(gitEmail)
 				'name'(gitName)
 			}
+			if (gitUseSshKey) {
+				project / 'buildWrappers' / 'org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper' / 'bindings' << 'org.jenkinsci.plugins.credentialsbinding.impl.SSHUserPrivateKeyBinding' {
+					'credentialsId'(gitSshCredentials)
+					'keyFileVariable'(PipelineDefaults.GIT_SSH_KEY_LOCATION_ENV_VAR)
+				}
+			}
 		}
 		steps {
 			shell(downloadTools())
-			shell('''#!/bin/bash 
-		${WORKSPACE}/.git/tools/common/src/main/bash/build_and_upload.sh
-		''')
+			shell("""#!/bin/bash 
+		${bashFunctions.setupGitCredentials(fullGitRepo)}
+		\${WORKSPACE}/.git/tools/common/src/main/bash/build_and_upload.sh
+		""")
 		}
 		publishers {
 			archiveJunit(testReports)
@@ -613,9 +623,10 @@ parsedRepos.each {
 		}
 		steps {
 			shell(downloadTools())
-			shell('''#!/bin/bash
-		${WORKSPACE}/.git/tools/common/src/main/bash/prod_deploy.sh
-		''')
+			shell("""#!/bin/bash
+		${bashFunctions.setupGitCredentials(fullGitRepo)}
+		\${WORKSPACE}/.git/tools/common/src/main/bash/prod_deploy.sh
+		""")
 		}
 		publishers {
 			// remove::start[K8S]
@@ -656,6 +667,7 @@ parsedRepos.each {
 				// remove::start[K8S]
 				if (k8sTestTokenCredentialId) string("TOKEN", k8sTestTokenCredentialId)
 				// remove::end[K8S]
+				if (!gitUseSshKey) usernamePassword(PipelineDefaults.GIT_USER_ENV_VAR, PipelineDefaults.GIT_REPO_PASS_ENV_VAR, gitCredentials)
 			}
 			timestamps()
 			colorizeOutput()
@@ -668,6 +680,14 @@ parsedRepos.each {
 		}
 		scm {
 			configureScm(delegate as ScmContext, fullGitRepo, "dev/${gitRepoName}/\${PIPELINE_VERSION}")
+		}
+		configure {
+			if (gitUseSshKey) {
+				project / 'buildWrappers' / 'org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper' / 'bindings' << 'org.jenkinsci.plugins.credentialsbinding.impl.SSHUserPrivateKeyBinding' {
+					'credentialsId'(gitSshCredentials)
+					'keyFileVariable'(PipelineDefaults.GIT_SSH_KEY_LOCATION_ENV_VAR)
+				}
+			}
 		}
 		steps {
 			shell(downloadTools())
@@ -719,6 +739,10 @@ parsedRepos.each {
  * Also it contains the default env vars setting
  */
 class PipelineDefaults {
+
+	protected static final String GIT_SSH_KEY_LOCATION_ENV_VAR = "GIT_SSH_LOCATION_ENV_VAR"
+	protected static final String GIT_USER_ENV_VAR = "GIT_USER_ENV_VAR"
+	protected static final String GIT_REPO_PASS_ENV_VAR = "GIT_REPO_PASS_ENV_VAR"
 
 	final Map<String, String> defaultEnvVars
 
@@ -807,5 +831,42 @@ enum RepoType {
 	static RepoType from(String string) {
 		if (string.endsWith(".tar.gz")) return TARBALL
 		return GIT
+	}
+}
+
+@CompileStatic
+class BashFunctions {
+
+	private final boolean gitUseSsh
+	private final String gitUser
+	private final String gitEmail
+
+	BashFunctions(String gitUser, String gitEmail, boolean gitUseSsh) {
+		this.gitUseSsh = gitUseSsh
+		this.gitUser = gitUser
+		this.gitEmail = gitEmail
+	}
+
+	String setupGitCredentials(String repoUrl) {
+		if (gitUseSsh) {
+			return """\
+				eval \$("ssh-agent") >/dev/null 2>&1
+				echo "Evaled ssh agent"
+				trap 'kill \$SSH_AGENT_PID' 0
+				echo "Adding ssh key"
+				ssh-add \$${PipelineDefaults.GIT_SSH_KEY_LOCATION_ENV_VAR} >/dev/null
+				"""
+		}
+		URI uri = URI.create(repoUrl)
+		String host = uri.getHost()
+		return """\
+					set +x
+					tmpDir="\$(mktemp -d)"
+					trap "{ rm -f \${tmpDir}; }" EXIT
+					git config user.name "${gitUser}"
+					git config user.email "${gitEmail}"
+					git config credential.helper "store --file=\${tmpDir}/gitcredentials"
+					echo "https://\$${PipelineDefaults.GIT_USER_ENV_VAR}:\$${PipelineDefaults.GIT_REPO_PASS_ENV_VAR}@${host}" > \${tmpDir}/gitcredentials
+				"""
 	}
 }
