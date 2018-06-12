@@ -863,7 +863,7 @@ class BashFunctions {
 		return """\
 					set +x
 					tmpDir="\$(mktemp -d)"
-					trap "{ rm -f \${tmpDir}; }" EXIT
+					trap "{ rm -rf \${tmpDir}; }" EXIT
 					git config user.name "${gitUser}"
 					git config user.email "${gitEmail}"
 					git config credential.helper "store --file=\${tmpDir}/gitcredentials"
