@@ -244,7 +244,7 @@ export ROOT_PROJECT_DIR
 export PROJECT_SETUP
 export PROJECT_NAME
 parsePipelineDescriptor
-echo "Root project directory [${ROOT_PROJECT_DIR}]"
+echo "Project name [${PROJECT_NAME}]"
 # if pipeline descriptor is in the provided folder that means that
 # we don't have a descriptor per application
 if [[ "${PIPELINE_DESCRIPTOR_PRESENT}" == "true" ]]; then
@@ -259,13 +259,14 @@ if [[ "${PIPELINE_DESCRIPTOR_PRESENT}" == "true" ]]; then
 		PROJECT_SETUP="SINGLE_REPO"
 		echo "No build coordinates section found, project setup [${PROJECT_SETUP}], main module path [${mainModulePath}]"
 	fi
+	ROOT_PROJECT_DIR="."
 else
 	echo "Pipeline descriptor missing"
-	# if pipeline descriptor is missing but the provided root project dir exists
+	# if pipeline descriptor is missing but a directory with name equal to PROJECT_NAME exists
 	# that means that it's a multi-project and we need to cd to that folder
-	if [[ -d "${ROOT_PROJECT_DIR}" ]]; then
-		echo "Root project dir found [${ROOT_PROJECT_DIR}]"
-		cd "${ROOT_PROJECT_DIR}"
+	if [[ -d "${PROJECT_NAME}" ]]; then
+		echo "Project dir found [${PROJECT_NAME}]"
+		cd "${PROJECT_NAME}"
 		parsePipelineDescriptor
 		mainModulePath="$( getMainModulePath )"
 		if [[ "${mainModulePath}" != "" && "${mainModulePath}" != "null" ]]; then
@@ -277,19 +278,15 @@ else
 			PROJECT_SETUP="MULTI_PROJECT"
 			echo "No build coordinates section found, project setup [${PROJECT_SETUP}], main module path [${mainModulePath}]"
 		fi
+		ROOT_PROJECT_DIR="${PROJECT_NAME}"
 	else
 		# No descriptor and no module is present - will treat it as a single repo with no descriptor
 		PROJECT_SETUP="SINGLE_REPO"
-		echo "No descriptor or module found, project setup [${PROJECT_SETUP}]"
+		echo "No descriptor or module found for project with name [${PROJECT_NAME}], project setup [${PROJECT_SETUP}]"
+		ROOT_PROJECT_DIR="."
 	fi
 fi
 
-# Regardless of the project setup, if the root project dir doesn't exist, we should point
-# to the current folder as the root project directory
-if [[ ! -f "${ROOT_PROJECT_DIR}" ]]; then
-	ROOT_PROJECT_DIR="."
-fi
-cd "${ROOT_PROJECT_DIR}"
 # Project name can be taken from env variable or from the project's app name
 # We need it to tag the project somehow if the PROJECT_NAME var wasn't passed
 if [[ "${PROJECT_NAME}" == "" || "${PROJECT_NAME}" == "null" ]]; then
@@ -300,6 +297,7 @@ if [[ "${PROJECT_NAME}" == "" || "${PROJECT_NAME}" == "null" ]]; then
 		PROJECT_NAME="$(basename "$(pwd)")"
 	fi
 fi
+
 echo "Project with name [${PROJECT_NAME}] is setup as [${PROJECT_SETUP}]. The project directory is present at [${ROOT_PROJECT_DIR}]"
 
 # shellcheck source=/dev/null
