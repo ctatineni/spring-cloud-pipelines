@@ -239,27 +239,6 @@ export PIPELINE_DESCRIPTOR PAAS_TYPE LOWERCASE_ENV GIT_BIN
 
 echo "Picked PAAS is [${PAAS_TYPE}]"
 echo "Current environment is [${ENVIRONMENT}]"
-# shellcheck source=/dev/null
-[[ -f "${__ROOT}/pipeline-${PAAS_TYPE}.sh" ]] && source "${__ROOT}/pipeline-${PAAS_TYPE}.sh" ||  \
- echo "No pipeline-${PAAS_TYPE}.sh found"
-
-OUTPUT_FOLDER="$(outputFolder)"
-TEST_REPORTS_FOLDER="$(testResultsAntPattern)"
-
-export OUTPUT_FOLDER TEST_REPORTS_FOLDER
-
-echo "Output folder [${OUTPUT_FOLDER}]"
-echo "Test reports folder [${TEST_REPORTS_FOLDER}]"
-
-export CUSTOM_SCRIPT_IDENTIFIER="${CUSTOM_SCRIPT_IDENTIFIER:-custom}"
-echo "Custom script identifier is [${CUSTOM_SCRIPT_IDENTIFIER}]"
-CUSTOM_SCRIPT_DIR="${__ROOT}/${CUSTOM_SCRIPT_IDENTIFIER}"
-mkdir -p "${__ROOT}/${CUSTOM_SCRIPT_IDENTIFIER}"
-CUSTOM_SCRIPT_NAME="$(basename "${BASH_SOURCE[1]}")"
-echo "Path to custom script is [${CUSTOM_SCRIPT_DIR}/${CUSTOM_SCRIPT_NAME}]"
-# shellcheck source=/dev/null
-[[ -f "${CUSTOM_SCRIPT_DIR}/${CUSTOM_SCRIPT_NAME}" ]] && source "${CUSTOM_SCRIPT_DIR}/${CUSTOM_SCRIPT_NAME}" ||  \
- echo "No ${CUSTOM_SCRIPT_DIR}/${CUSTOM_SCRIPT_NAME} found"
 
 export ROOT_PROJECT_DIR
 export PROJECT_SETUP
@@ -304,6 +283,7 @@ else
 		echo "No descriptor or module found, project setup [${PROJECT_SETUP}]"
 	fi
 fi
+
 # Regardless of the project setup, if the root project dir doesn't exist, we should point
 # to the current folder as the root project directory
 if [[ ! -f "${ROOT_PROJECT_DIR}" ]]; then
@@ -321,4 +301,27 @@ if [[ "${PROJECT_NAME}" == "" || "${PROJECT_NAME}" == "null" ]]; then
 	fi
 fi
 echo "Project with name [${PROJECT_NAME}] is setup as [${PROJECT_SETUP}]. The project directory is present at [${ROOT_PROJECT_DIR}]"
+
+# shellcheck source=/dev/null
+[[ -f "${__ROOT}/pipeline-${PAAS_TYPE}.sh" ]] && source "${__ROOT}/pipeline-${PAAS_TYPE}.sh" ||  \
+ echo "No pipeline-${PAAS_TYPE}.sh found"
+
+OUTPUT_FOLDER="$(outputFolder)"
+TEST_REPORTS_FOLDER="$(testResultsAntPattern)"
+
+export OUTPUT_FOLDER TEST_REPORTS_FOLDER
+
+echo "Output folder [${OUTPUT_FOLDER}]"
+echo "Test reports folder [${TEST_REPORTS_FOLDER}]"
+
+export CUSTOM_SCRIPT_IDENTIFIER="${CUSTOM_SCRIPT_IDENTIFIER:-custom}"
+echo "Custom script identifier is [${CUSTOM_SCRIPT_IDENTIFIER}]"
+CUSTOM_SCRIPT_DIR="${__ROOT}/${CUSTOM_SCRIPT_IDENTIFIER}"
+mkdir -p "${__ROOT}/${CUSTOM_SCRIPT_IDENTIFIER}"
+CUSTOM_SCRIPT_NAME="$(basename "${BASH_SOURCE[1]}")"
+echo "Path to custom script is [${CUSTOM_SCRIPT_DIR}/${CUSTOM_SCRIPT_NAME}]"
+# shellcheck source=/dev/null
+[[ -f "${CUSTOM_SCRIPT_DIR}/${CUSTOM_SCRIPT_NAME}" ]] && source "${CUSTOM_SCRIPT_DIR}/${CUSTOM_SCRIPT_NAME}" ||  \
+ echo "No ${CUSTOM_SCRIPT_DIR}/${CUSTOM_SCRIPT_NAME} found"
+
 
